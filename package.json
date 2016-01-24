@@ -1,7 +1,7 @@
 {
-  "name": "redux",
-  "version": "3.0.5",
-  "description": "Predictable state container for JavaScript apps",
+  "name": "redux-select",
+  "version": "0.1.0",
+  "description": "Predictable state container for React apps",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "files": [
@@ -34,11 +34,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rackt/redux.git"
+    "url": "https://github.com/javascriptjedi/redux-select.git"
   },
   "keywords": [
     "redux",
     "reducer",
+    "reselect",
+    "react-redux",
     "state",
     "predictable",
     "functional",
@@ -51,13 +53,18 @@
   ],
   "authors": [
     "Dan Abramov <dan.abramov@me.com> (https://github.com/gaearon)",
-    "Andrew Clark <acdlite@me.com> (https://github.com/acdlite)"
+    "Andrew Clark <acdlite@me.com> (https://github.com/acdlite)",
+    "Matt Thornton <javascriptjedi@gmail.com> (https://github.com/javascriptjedi)"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rackt/redux/issues"
+    "url": "https://github.com/javascriptjedi/redux-select/issues"
   },
-  "homepage": "http://rackt.github.io/redux",
+  "homepage": "http://javascriptjedi.github.io/redux",
+  "dependencies": {
+    "hoist-non-react-statics": "^1.0.3",
+    "invariant": "^2.0.0"
+  },
   "devDependencies": {
     "babel": "^5.5.8",
     "babel-core": "^5.6.18",
@@ -69,7 +76,12 @@
     "expect": "^1.8.0",
     "gitbook-cli": "^0.3.4",
     "isparta": "^3.0.3",
+    "jsdom": "~5.4.3",
     "mocha": "^2.2.5",
+    "mocha-jsdom": "~0.4.0",
+    "react": "0.14.3",
+    "react-addons-test-utils": "0.14.3",
+    "react-dom": "0.14.0",
     "reselect": "2.0.1",
     "rimraf": "^2.3.4",
     "webpack": "^1.9.6"
