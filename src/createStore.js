@@ -1,4 +1,15 @@
 import isPlainObject from './utils/isPlainObject'
+
+/**
+ * These are private action types reserved by Redux.
+ * For any unknown actions, you must return the current state.
+ * If the current state is undefined, you must return the initial state.
+ * Do not reference these action types directly in your code.
+ */
+export var ActionTypes = {
+  INIT: '@@redux/INIT'
+}
+
 import combineReducers from './combineReducers';
 import { createSelector } from 'reselect';
 
@@ -10,13 +21,13 @@ const extractArgumentNamesFromFunction = fn => {
 	return stringMatch.length > 1 ? stringMatch[1].split(',') : [];
 };
 
-const createStore = () => {
+const createStore = (reducer, initialState) => {
 	let isDispatching = false;
 	let pendingDispatches = [];
-	let currentState = {};
+	let currentState = initialState;
 	let reducerObject = {};
-	const initialReducer = () => currentState;
-	let currentReducer = initialReducer;
+	const initialReducer = currentState;
+	let currentReducer = reducer || initialReducer;
 
 	const getState = () => currentState;
 
@@ -37,8 +48,6 @@ const createStore = () => {
 			const index = listeners.indexOf(listener);
 			listeners.splice(index, 1);
 		};
-
-		listener();
 
 		return unsubscribe;
 	};
@@ -113,7 +122,7 @@ const createStore = () => {
 
 		triggerListeners();
 	};
-	
+
 	/**
    * Replaces the reducer currently used by the store to calculate the state.
    *
@@ -125,7 +134,7 @@ const createStore = () => {
    * @returns {void}
    */
   function replaceReducer(nextReducer) {
-    currentReducer = nextReducer
+    currentReducer = nextReducer;
     dispatch({ type: ActionTypes.INIT })
   }
 
@@ -137,11 +146,6 @@ const createStore = () => {
 			);
 		}
 
-		if (currentReducer === initialReducer) {
-			pendingDispatches.push(action);
-			return;
-		}
-
 		if (typeof action.type === 'undefined') {
 			throw new Error(
 				'Actions may not have an undefined "type" property. ' +
@@ -151,6 +155,11 @@ const createStore = () => {
 
 		if (isDispatching) {
 			throw new Error('Reducers may not dispatch actions.');
+		}
+
+		if (currentReducer === initialReducer) {
+			pendingDispatches.push(action);
+			return;
 		}
 
 		try {
@@ -172,6 +181,7 @@ const createStore = () => {
 		currentState = {};
 	};
 
+	dispatch({ type: ActionTypes.INIT })
 
 	return {
 		getState,
@@ -179,7 +189,6 @@ const createStore = () => {
 		subscribe,
 		addReducers,
 		replaceReducer,
-		addSelectors,
 		addSelector,
 		getSelectorByName,
 		reset

@@ -8,29 +8,15 @@ describe('createStore', () => {
     const store = createStore(combineReducers(reducers))
     const methods = Object.keys(store)
 
-    expect(methods.length).toBe(4)
+    expect(methods.length).toBe(8)
     expect(methods).toContain('subscribe')
     expect(methods).toContain('dispatch')
     expect(methods).toContain('getState')
     expect(methods).toContain('replaceReducer')
-  })
-
-  it('requires a reducer function', () => {
-    expect(() =>
-      createStore()
-    ).toThrow()
-
-    expect(() =>
-      createStore('test')
-    ).toThrow()
-
-    expect(() =>
-      createStore({})
-    ).toThrow()
-
-    expect(() =>
-      createStore(() => {})
-    ).toNotThrow()
+    expect(methods).toContain('addReducers')
+    expect(methods).toContain('addSelector')
+    expect(methods).toContain('getSelectorByName')
+    expect(methods).toContain('reset')
   })
 
   it('passes the initial action and the initial state', () => {
@@ -90,7 +76,7 @@ describe('createStore', () => {
     ])
 
     store.dispatch(unknownAction())
-    expect(store.getState()).toEqual([ 
+    expect(store.getState()).toEqual([
       {
         id: 1,
         text: 'Hello'
@@ -140,11 +126,11 @@ describe('createStore', () => {
       {
         id: 3,
         text: 'Perhaps'
-      }, 
+      },
       {
         id: 1,
         text: 'Hello'
-      }, 
+      },
       {
         id: 2,
         text: 'World'
@@ -156,11 +142,11 @@ describe('createStore', () => {
       {
         id: 3,
         text: 'Perhaps'
-      }, 
+      },
       {
         id: 1,
         text: 'Hello'
-      }, 
+      },
       {
         id: 2,
         text: 'World'
@@ -172,15 +158,15 @@ describe('createStore', () => {
       {
         id: 3,
         text: 'Perhaps'
-      }, 
+      },
       {
         id: 1,
         text: 'Hello'
-      }, 
+      },
       {
         id: 2,
         text: 'World'
-      }, 
+      },
       {
         id: 4,
         text: 'Surely'
