@@ -1,5 +1,6 @@
 import React from 'react';
 import connect from './connect';
+import store from '../store';
 
 const mapSelectorsAndDispatchToProps = (selectorNames, mapDispatchToProps) => {
   if (selectorNames) {

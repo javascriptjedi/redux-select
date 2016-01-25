@@ -136,7 +136,6 @@ function connect(mapStateToProps, mapDispatchToProps, mergeProps) {
         _Component.call(this, props, context);
         this.version = version;
         this.store = props.store || context.store;
-        console.log('do we have a store? ', this.store);
 
         _invariant2['default'](this.store, 'Could not find "store" in either the context or ' + ('props of "' + this.constructor.displayName + '". ') + 'Either wrap the root component in a <Provider>, ' + ('or explicitly pass "store" as a prop to "' + this.constructor.displayName + '".'));
 

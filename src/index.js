@@ -4,7 +4,7 @@ import bindActionCreators from './bindActionCreators'
 import applyMiddleware from './applyMiddleware'
 import compose from './compose'
 import store from './store'
-import Store from './components/Store.jsx'
+import ReduxStore from './components/ReduxStore'
 import mapSelectorsAndDispatchToProps from './components/mapSelectorsAndDispatchToProps'
 
 /*
@@ -27,7 +27,7 @@ if (isCrushed.name !== 'isCrushed' && process.env.NODE_ENV !== 'production') {
 
 export {
 	store,
-  Store,
+  ReduxStore,
   mapSelectorsAndDispatchToProps,
   createStore,
   combineReducers,

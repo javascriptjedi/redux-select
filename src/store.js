@@ -1,3 +1,7 @@
+import thunk from 'redux-thunk'
 import createStore from './createStore'
+import applyMiddleware from './applyMiddleware';
 
-export default createStore();
+const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
+
+export default createStoreWithMiddleware();

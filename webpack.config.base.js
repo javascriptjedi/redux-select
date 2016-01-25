@@ -24,7 +24,7 @@ module.exports = {
     ]
   },
   output: {
-    library: 'Redux',
+    library: 'Redux-Select',
     libraryTarget: 'umd'
   },
   resolve: {

@@ -1,7 +1,7 @@
 {
   "name": "redux-select",
   "version": "0.1.0",
-  "description": "Predictable state container for React apps",
+  "description": "Predictable state container for React apps combining Redux, Reselect, React-Redux and exporting a Thunk-wrapped store.",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "files": [
@@ -18,8 +18,8 @@
     "test:examples": "babel-node examples/testAll.js",
     "check": "npm run lint && npm run test",
     "build:lib": "babel src --out-dir lib",
-    "build:umd": "webpack src/index.js dist/redux.js --config webpack.config.development.js",
-    "build:umd:min": "webpack src/index.js dist/redux.min.js --config webpack.config.production.js",
+    "build:umd": "webpack src/index.js dist/redux-select.js --config webpack.config.development.js",
+    "build:umd:min": "webpack src/index.js dist/redux-select.min.js --config webpack.config.production.js",
     "build:examples": "babel-node examples/buildAll.js",
     "build": "npm run build:lib && npm run build:umd && npm run build:umd:min",
     "preversion": "npm run clean && npm run check",
@@ -79,6 +79,7 @@
     "jsdom": "~5.4.3",
     "mocha": "^2.2.5",
     "mocha-jsdom": "~0.4.0",
+    "redux-thunk": "1.0.0",
     "react": "0.14.3",
     "react-addons-test-utils": "0.14.3",
     "react-dom": "0.14.0",
