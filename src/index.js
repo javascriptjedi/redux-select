@@ -5,6 +5,8 @@ import applyMiddleware from './applyMiddleware'
 import compose from './compose'
 import store from './store'
 import ReduxStore from './components/ReduxStore'
+import Provider from './components/Provider'
+import connect from './components/connect'
 import mapSelectorsAndDispatchToProps from './components/mapSelectorsAndDispatchToProps'
 
 /*
@@ -26,8 +28,10 @@ if (isCrushed.name !== 'isCrushed' && process.env.NODE_ENV !== 'production') {
 }
 
 export {
-	store,
+  store,
   ReduxStore,
+	connect,
+  Provider,
   mapSelectorsAndDispatchToProps,
   createStore,
   combineReducers,
