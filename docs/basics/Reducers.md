@@ -99,7 +99,7 @@ function todoApp(state = initialState, action) {
 
 Note that:
 
-1. **We don’t mutate the `state`.** We create a copy with [`Object.assign()`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign). `Object.assign(state, { visibilityFilter: action.filter })` is also wrong: it will mutate the first argument. You **must** supply an empty object as the first parameter. You can also enable the experimental [object spread syntax](https://github.com/sebmarkbage/ecmascript-rest-spread) proposed for ES7 to write `{ ...state, ...newState }` instead.
+1. **We don’t mutate the `state`.** We create a copy with [`Object.assign()`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign). `Object.assign(state, { visibilityFilter: action.filter })` is also wrong: it will mutate the first argument. You **must** supply an empty object as the first parameter. You can also enable the [object spread operator proposal](../recipes/UsingObjectSpreadOperator.md) to write `{ ...state, ...newState }` instead.
 
 2. **We return the previous `state` in the `default` case.** It’s important to return the previous `state` for any unknown action.
 
@@ -147,17 +147,18 @@ Finally, the implementation of the `COMPLETE_TODO` handler shouldn’t come as a
 ```js
 case COMPLETE_TODO:
   return Object.assign({}, state, {
-    todos: [
-      ...state.todos.slice(0, action.index),
-      Object.assign({}, state.todos[action.index], {
-        completed: true
-      }),
-      ...state.todos.slice(action.index + 1)
-    ]
+    todos: state.todos.map((todo, index) => {
+      if (index === action.index) {
+        return Object.assign({}, todo, {
+          completed: true
+        })
+      }
+      return todo
+    })
   })
 ```
 
-Because we want to update a specific item in the array without resorting to mutations, we have to slice it before and after the item. If you find yourself often writing such operations, it’s a good idea to use a helper like [react-addons-update](https://facebook.github.io/react/docs/update.html), [updeep](https://github.com/substantial/updeep), or even a library like [Immutable](http://facebook.github.io/immutable-js/) that has native support for deep updates. Just remember to never assign to anything inside the `state` unless you clone it first.
+Because we want to update a specific item in the array without resorting to mutations, we have to create a new array with the same items except the item at the index. If you find yourself often writing such operations, it’s a good idea to use a helper like [react-addons-update](https://facebook.github.io/react/docs/update.html), [updeep](https://github.com/substantial/updeep), or even a library like [Immutable](http://facebook.github.io/immutable-js/) that has native support for deep updates. Just remember to never assign to anything inside the `state` unless you clone it first.
 
 ## Splitting Reducers
 
@@ -182,13 +183,14 @@ function todoApp(state = initialState, action) {
       })
     case COMPLETE_TODO:
       return Object.assign({}, state, {
-        todos: [
-          ...state.todos.slice(0, action.index),
-          Object.assign({}, state.todos[action.index], {
-            completed: true
-          }),
-          ...state.todos.slice(action.index + 1)
-        ]
+        todos: state.todos.map((todo, index) => {
+          if(index === action.index) {
+            return Object.assign({}, todo, {
+              completed: true
+            })
+          }
+          return todo
+        })
       })
     default:
       return state
@@ -210,13 +212,14 @@ function todos(state = [], action) {
         }
       ]
     case COMPLETE_TODO:
-      return [
-        ...state.slice(0, action.index),
-        Object.assign({}, state[action.index], {
-          completed: true
-        }),
-        ...state.slice(action.index + 1)
-      ]
+      return state.map((todo, index) => {
+        if (index === action.index) {
+          return Object.assign({}, todo, {
+            completed: true
+          })
+        }
+        return todo
+      })
     default:
       return state
   }
@@ -268,13 +271,14 @@ function todos(state = [], action) {
         }
       ]
     case COMPLETE_TODO:
-      return [
-        ...state.slice(0, action.index),
-        Object.assign({}, state[action.index], {
-          completed: true
-        }),
-        ...state.slice(action.index + 1)
-      ]
+      return state.map((todo, index) => {
+        if (index === action.index) {
+          return Object.assign({}, todo, {
+            completed: true
+          })
+        }
+        return todo
+      })
     default:
       return state
   }
@@ -336,7 +340,7 @@ const reducer = combineReducers({
 ```
 
 ```js
-function reducer(state, action) {
+function reducer(state = {}, action) {
   return {
     a: doSomethingWithA(state.a, action),
     b: processB(state.b, action),
@@ -345,7 +349,7 @@ function reducer(state, action) {
 }
 ```
 
-All [`combineReducers()`](../api/combineReducers.md) does is generate a function that calls your reducers **with the slices of state selected according to their keys**, and combining their results into a single object again. [It’s not magic.](https://github.com/rackt/redux/issues/428#issuecomment-129223274)
+All [`combineReducers()`](../api/combineReducers.md) does is generate a function that calls your reducers **with the slices of state selected according to their keys**, and combining their results into a single object again. [It’s not magic.](https://github.com/reactjs/redux/issues/428#issuecomment-129223274)
 
 >##### Note for ES6 Savvy Users
 
@@ -358,7 +362,7 @@ All [`combineReducers()`](../api/combineReducers.md) does is generate a function
 >const todoApp = combineReducers(reducers)
 >```
 >
->Because `import *` is still new syntax, we don’t use it anymore in the documentation to avoid [confusion](https://github.com/rackt/redux/issues/428#issuecomment-129223274), but you may encounter it in some community examples.
+>Because `import *` is still new syntax, we don’t use it anymore in the documentation to avoid [confusion](https://github.com/reactjs/redux/issues/428#issuecomment-129223274), but you may encounter it in some community examples.
 
 ## Source Code
 
@@ -389,13 +393,14 @@ function todos(state = [], action) {
         }
       ]
     case COMPLETE_TODO:
-      return [
-        ...state.slice(0, action.index),
-        Object.assign({}, state[action.index], {
-          completed: true
-        }),
-        ...state.slice(action.index + 1)
-      ]
+      return state.map((todo, index) => {
+        if (index === action.index) {
+          return Object.assign({}, todo, {
+            completed: true
+          })
+        }
+        return todo
+      })
     default:
       return state
   }
