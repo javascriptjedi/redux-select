@@ -122,7 +122,7 @@ describe('async actions', () => {
     nock.cleanAll()
   })
 
-  it('creates FETCH_TODOS_SUCCESS when fetching todos has been done', (done) => {
+  it('creates FETCH_TODOS_SUCCESS when fetching todos has been done', () => {
     nock('http://example.com/')
       .get('/todos')
       .reply(200, { body: { todos: ['do something'] }})
@@ -133,13 +133,9 @@ describe('async actions', () => {
     ]
     const store = mockStore({ todos: [] })
 
-    store.dispatch(actions.fetchTodos())
-      .then(() => {
-        const actions = store.getActions()
-
-        expect(actions[0].type).toEqual(types.FETCH_TODOS_REQUEST)
-
-        done()
+    return store.dispatch(actions.fetchTodos())
+      .then(() => { // return of async actions
+        expect(store.getActions()).toEqual(expectedActions)
       })
   })
 })
@@ -491,4 +487,4 @@ describe('middleware', () => {
 
 - [jsdom](https://github.com/tmpvar/jsdom): A plain JavaScript implementation of the DOM API. jsdom allows us to run the tests without browser.
 
-- [Shallow rendering](http://facebook.github.io/react/docs/test-utils.html#shallow-rendering): Shallow rendering lets you instantiate a component and get the result of its `render` method just a single level deep instead of rendering components recursively to a DOM. The result of shallow rendering is a [ReactElement](https://facebook.github.io/react/docs/glossary.html#react-elements). That means it is possible to access its children, props and test if it works as expected. This also means that you changing a child component won’t affect the tests for parent component.
+- [Shallow rendering](http://facebook.github.io/react/docs/test-utils.html#shallow-rendering): Shallow rendering lets you instantiate a component and get the result of its `render` method just a single level deep instead of rendering components recursively to a DOM. The result of shallow rendering is a [ReactElement](https://facebook.github.io/react/docs/glossary.html#react-elements). That means it is possible to access its children, props and test if it works as expected. This also means that changing a child component won’t affect the tests for parent component.

@@ -93,7 +93,9 @@ export function combineReducers<S>(reducers: ReducersMapObject): Reducer<S>;
  * transform, delay, ignore, or otherwise interpret actions or async actions
  * before passing them to the next middleware.
  */
-export type Dispatch = (action: any) => any;
+export interface Dispatch<S> {
+    <A extends Action>(action: A): A;
+}
 
 /**
  * Function to remove listener added by `Store.subscribe()`.
@@ -136,7 +138,7 @@ export interface Store<S> {
    * Note that, if you use a custom middleware, it may wrap `dispatch()` to
    * return something else (for example, a Promise you can await).
    */
-  dispatch: Dispatch;
+  dispatch: Dispatch<S>;
 
   /**
    * Reads the state tree managed by the store.
@@ -192,9 +194,8 @@ export interface Store<S> {
  * @template S State object type.
  */
 export interface StoreCreator {
-  <S>(reducer: Reducer<S>, enhancer?: StoreEnhancer): Store<S>;
-  <S>(reducer: Reducer<S>, initialState: S,
-      enhancer?: StoreEnhancer): Store<S>;
+  <S>(reducer: Reducer<S>, enhancer?: StoreEnhancer<S>): Store<S>;
+  <S>(reducer: Reducer<S>, initialState: S, enhancer?: StoreEnhancer<S>): Store<S>;
 }
 
 /**
@@ -215,7 +216,9 @@ export interface StoreCreator {
  * without the app being aware it is happening. Amusingly, the Redux
  * middleware implementation is itself a store enhancer.
  */
-export type StoreEnhancer = (next: StoreCreator) => StoreCreator;
+export type StoreEnhancer<S> = (next: StoreEnhancerStoreCreator<S>) => StoreEnhancerStoreCreator<S>;
+export type GenericStoreEnhancer = <S>(next: StoreEnhancerStoreCreator<S>) => StoreEnhancerStoreCreator<S>;
+export type StoreEnhancerStoreCreator<S> = (reducer: Reducer<S>, initialState: S) => Store<S>;
 
 /**
  * Creates a Redux store that holds the state tree.
@@ -251,7 +254,7 @@ export const createStore: StoreCreator;
 /* middleware */
 
 export interface MiddlewareAPI<S> {
-  dispatch: Dispatch;
+  dispatch: Dispatch<S>;
   getState(): S;
 }
 
@@ -265,7 +268,7 @@ export interface MiddlewareAPI<S> {
  * asynchronous API call into a series of synchronous actions.
  */
 export interface Middleware {
-  <S>(api: MiddlewareAPI<S>): (next: Dispatch) => (action: any) => any;
+  <S>(api: MiddlewareAPI<S>): (next: Dispatch<S>) => Dispatch<S>;
 }
 
 /**
@@ -285,7 +288,7 @@ export interface Middleware {
  * @param middlewares The middleware chain to be applied.
  * @returns A store enhancer applying the middleware.
  */
-export function applyMiddleware(...middlewares: Middleware[]): StoreEnhancer;
+export function applyMiddleware(...middlewares: Middleware[]): GenericStoreEnhancer;
 
 
 /* action creators */
@@ -337,19 +340,19 @@ export interface ActionCreatorsMapObject {
  *   creator wrapped into the `dispatch` call. If you passed a function as
  *   `actionCreator`, the return value will also be a single function.
  */
-export function bindActionCreators<A extends ActionCreator<any>>(actionCreator: A, dispatch: Dispatch): A;
+export function bindActionCreators<A extends ActionCreator<any>>(actionCreator: A, dispatch: Dispatch<any>): A;
 
 export function bindActionCreators<
   A extends ActionCreator<any>,
   B extends ActionCreator<any>
-  >(actionCreator: A, dispatch: Dispatch): B;
+  >(actionCreator: A, dispatch: Dispatch<any>): B;
 
-export function bindActionCreators<M extends ActionCreatorsMapObject>(actionCreators: M, dispatch: Dispatch): M;
+export function bindActionCreators<M extends ActionCreatorsMapObject>(actionCreators: M, dispatch: Dispatch<any>): M;
 
 export function bindActionCreators<
   M extends ActionCreatorsMapObject,
   N extends ActionCreatorsMapObject
-  >(actionCreators: M, dispatch: Dispatch): N;
+  >(actionCreators: M, dispatch: Dispatch<any>): N;
 
 
 /* compose */

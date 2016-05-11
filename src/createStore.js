@@ -1,4 +1,5 @@
 import isPlainObject from 'lodash/isPlainObject'
+import $$observable from 'symbol-observable'
 import assign from 'lodash/assign'
 import { createSelector } from 'reselect'
 import combineReducers from './combineReducers'
@@ -285,7 +286,46 @@ export default function createStore(reducer, initialState, enhancer) {
     dispatch({ type: ActionTypes.INIT })
   }
 
-   //this should really only be called by tests
+  /**
+   * Interoperability point for observable/reactive libraries.
+   * @returns {observable} A minimal observable of state changes.
+   * For more information, see the observable proposal:
+   * https://github.com/zenparsing/es-observable
+   */
+  function observable() {
+    var outerSubscribe = subscribe
+    return {
+      /**
+       * The minimal observable subscription method.
+       * @param {Object} observer Any object that can be used as an observer.
+       * The observer object should have a `next` method.
+       * @returns {subscription} An object with an `unsubscribe` method that can
+       * be used to unsubscribe the observable from the store, and prevent further
+       * emission of values from the observable.
+       */
+      subscribe(observer) {
+        if (typeof observer !== 'object') {
+          throw new TypeError('Expected the observer to be an object.')
+        }
+
+        function observeState() {
+          if (observer.next) {
+            observer.next(getState())
+          }
+        }
+
+        observeState()
+        var unsubscribe = outerSubscribe(observeState)
+        return { unsubscribe }
+      },
+
+      [$$observable]() {
+        return this
+      }
+    }
+  }
+
+  //this should really only be called by tests
   function reset() {
     reducerObject = {}
     selectors = {}
@@ -306,6 +346,7 @@ export default function createStore(reducer, initialState, enhancer) {
     subscribe,
     getState,
     replaceReducer,
-    reset
+    reset,
+    [$$observable]: observable
   }
 }
