@@ -19,24 +19,6 @@ describe('createStore', () => {
     expect(methods).toContain('reset')
   })
 
-  it('throws if reducer is not a function', () => {
-    expect(() =>
-      createStore()
-    ).toThrow()
-
-    expect(() =>
-      createStore('test')
-    ).toThrow()
-
-    expect(() =>
-      createStore({})
-    ).toThrow()
-
-    expect(() =>
-      createStore(() => {})
-    ).toNotThrow()
-  })
-
   it('passes the initial action and the initial state', () => {
     const store = createStore(reducers.todos, [
       {

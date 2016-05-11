@@ -1,4 +1,7 @@
 import isPlainObject from 'lodash/isPlainObject'
+import assign from 'lodash/assign'
+import { createSelector } from 'reselect'
+import combineReducers from './combineReducers'
 
 /**
  * These are private action types reserved by Redux.
@@ -49,15 +52,20 @@ export default function createStore(reducer, initialState, enhancer) {
     return enhancer(createStore)(reducer, initialState)
   }
 
-  if (typeof reducer !== 'function') {
-    throw new Error('Expected the reducer to be a function.')
-  }
-
-  var currentReducer = reducer
+  var pendingDispatches = []
   var currentState = initialState
+  var reducerObject = {}
+  var initialReducer = currentState
+  var currentReducer = reducer || initialReducer
   var currentListeners = []
   var nextListeners = currentListeners
   var isDispatching = false
+
+  function triggerListeners() {
+    var listenersToCall = nextListeners.slice()
+
+    listenersToCall.forEach(listener => listener())
+  }
 
   function ensureCanMutateNextListeners() {
     if (nextListeners === currentListeners) {
@@ -120,6 +128,80 @@ export default function createStore(reducer, initialState, enhancer) {
     }
   }
 
+  var selectors = {}
+  /**
+   * Retrieves a selector function from the internal selector registry
+   *
+   * @param {String} name The name of the selector
+   * @returns {Function} The selector function
+   */
+  function getSelectorByName(name) { return selectors[name] }
+
+  function useSelectors(selectorNames) {
+    return selectorNames.reduce(function ( accumulator, selectorName ) {
+      accumulator.push(selectors[selectorName])
+
+      return accumulator
+    }, [])
+  }
+
+  function addReducerSelector(reducerName) {
+    if (selectors[reducerName] === undefined) {
+      selectors[reducerName] = state => state[reducerName]
+    }
+  }
+
+
+  function addSelector( newSelectorName, selectorNamesArray, selectorFunction ) {
+    //if you don't provide a selector function we do a straight pass through
+    //creating an object where the keys are the selector names and the values
+    //are the result of calling the selector function (reselect passing the
+    //values in)
+
+    if (!selectorFunction) {
+      selectorFunction = function () {
+        var selectorValues = Array.prototype.slice.call(null, arguments)
+        selectorNamesArray.reduce(function ( accumulator, selectorName, index ) {
+          accumulator[selectorName] = selectorValues[index]
+
+          return accumulator
+        }, {})
+      }
+    }
+
+    //TODO temporary fix, this is to handle race conditions where the selector is registering before the reducers have been added
+    selectorNamesArray.forEach(addReducerSelector)
+
+    selectors[newSelectorName] = createSelector(
+      useSelectors(selectorNamesArray),
+      selectorFunction
+    )
+
+    return selectors[newSelectorName]
+  }
+
+  //TODO array foreach support
+  //TODO we could run into a problem here if we swap stores while an async dispatch is happening
+  function addReducers( newReducers ) {
+    var initialStateForNewReducers = Object.keys(newReducers).reduce(function ( state, reducerName) {
+      state[reducerName] = newReducers[reducerName]()
+      addReducerSelector(reducerName)
+      return state
+    }, {})
+
+    reducerObject = assign(assign({}, newReducers), reducerObject)
+
+    currentReducer = combineReducers(reducerObject)
+    currentState = assign(assign({}, initialStateForNewReducers), currentState)
+
+    if (pendingDispatches.length) {
+      pendingDispatches.forEach(function (action) { dispatch(action) })
+      pendingDispatches.length = 0//TODO could replay these against reducers that get added later?
+    }
+
+    triggerListeners()
+  }
+
   /**
    * Dispatches an action. It is the only way to trigger a state change.
    *
@@ -164,6 +246,11 @@ export default function createStore(reducer, initialState, enhancer) {
       throw new Error('Reducers may not dispatch actions.')
     }
 
+    if (currentReducer === initialReducer) {
+      pendingDispatches.push(action)
+      return
+    }
+
     try {
       isDispatching = true
       currentState = currentReducer(currentState, action)
@@ -198,15 +285,27 @@ export default function createStore(reducer, initialState, enhancer) {
     dispatch({ type: ActionTypes.INIT })
   }
 
+   //this should really only be called by tests
+  function reset() {
+    reducerObject = {}
+    selectors = {}
+    currentReducer = initialReducer
+    currentState = {}
+  }
+
   // When a store is created, an "INIT" action is dispatched so that every
   // reducer returns their initial state. This effectively populates
   // the initial state tree.
   dispatch({ type: ActionTypes.INIT })
 
   return {
+    addReducers,
+    addSelector,
     dispatch,
+    getSelectorByName,
     subscribe,
     getState,
-    replaceReducer
+    replaceReducer,
+    reset
   }
 }

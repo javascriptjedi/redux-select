@@ -1,7 +1,7 @@
 {
   "name": "redux-select",
-  "version": "0.1.2",
-  "description": "Predictable state container for React apps combining Redux, Reselect, React-Redux and exporting a Thunk-wrapped store.",
+  "version": "1.0.0",
+  "description": "Redux with Reselect baked in (hoping to avoid Reselect boilerplate)",
   "main": "lib/index.js",
   "jsnext:main": "es/index.js",
   "typings": "./index.d.ts",
