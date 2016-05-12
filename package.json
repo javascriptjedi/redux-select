@@ -1,6 +1,6 @@
 {
   "name": "redux-select",
-  "version": "1.0.0",
+  "version": "3.5.2",
   "description": "Redux with Reselect baked in (hoping to avoid Reselect boilerplate)",
   "main": "lib/index.js",
   "jsnext:main": "es/index.js",
