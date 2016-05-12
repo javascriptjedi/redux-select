@@ -712,4 +712,85 @@ describe('createStore', () => {
       expect(results).toEqual([ { foo: 0, bar: 0, fromRx: true }, { foo: 1, bar: 0, fromRx: true } ])
     })
   })
+
+  describe('addReducers', () => {
+    function foo(state = 0, action) {
+      return action.type === 'foo' ? 1 : state
+    }
+
+    function bar(state = 0, action) {
+      return action.type === 'bar' ? 2 : state
+    }
+
+    function baz(state = 0, action) {
+      return action.type === 'baz' ? 3 : state
+    }
+
+    it('should allow a reducer to be added on the fly', () => {
+      const store = createStore()
+
+      store.addReducers({ foo, bar })
+
+      expect(store.getState()).toEqual({
+        foo: 0,
+        bar: 0
+      })
+
+      store.addReducers({ baz })
+
+      store.dispatch({ type: 'foo' })
+      store.dispatch({ type: 'baz' })
+
+      expect(store.getState()).toEqual({
+        foo: 1,
+        bar: 0,
+        baz: 3
+      })
+    })
+  })
+
+  describe('addSelector', () => {
+    function foo(state = 0, action) {
+      return action.type === 'foo' ? 1 : state
+    }
+
+    function bar(state = 0, action) {
+      return action.type === 'bar' ? 2 : state
+    }
+
+    let store
+
+    beforeEach(() => {
+      store = createStore(combineReducers({ foo, bar }))
+
+      store.addSelector('foobar', [ 'foo', 'bar' ], (foo, bar) => {
+        return `${foo}:${bar}`
+      })
+    })
+
+    it('should add a reselect selector to the store', () => {
+      const foobar = store.getSelectorByName('foobar')
+
+      store.dispatch({ type: 'foo' })
+
+      expect(foobar(store.getState())).toEqual('1:0')
+
+      store.dispatch({ type: 'bar' })
+
+      expect(foobar(store.getState())).toEqual('1:2')
+    })
+
+    it('should add a reselect "passthrough" selector', () => {
+      store.addSelector('foobarandfoo', [ 'foobar', 'foo' ] )
+
+      const foobarandfoo = store.getSelectorByName('foobarandfoo')
+
+      store.dispatch({ type: 'foo' })
+
+      expect(foobarandfoo(store.getState())).toEqual({
+        foobar: '1:0',
+        foo: 1
+      })
+    })
+  })
 })

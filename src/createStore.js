@@ -55,7 +55,7 @@ export default function createStore(reducer, initialState, enhancer) {
 
   var pendingDispatches = []
   var currentState = initialState
-  var reducerObject = {}
+  var reducerObject = {}//TODO we don't support having an initial reducer function when createStore is called with a reducer
   var initialReducer = currentState
   var currentReducer = reducer || initialReducer
   var currentListeners = []
@@ -161,8 +161,8 @@ export default function createStore(reducer, initialState, enhancer) {
 
     if (!selectorFunction) {
       selectorFunction = function () {
-        var selectorValues = Array.prototype.slice.call(null, arguments)
-        selectorNamesArray.reduce(function ( accumulator, selectorName, index ) {
+        var selectorValues = Array.prototype.slice.call(arguments)
+        return selectorNamesArray.reduce(function ( accumulator, selectorName, index ) {
           accumulator[selectorName] = selectorValues[index]
 
           return accumulator
@@ -184,8 +184,8 @@ export default function createStore(reducer, initialState, enhancer) {
   //TODO array foreach support
   //TODO we could run into a problem here if we swap stores while an async dispatch is happening
   function addReducers( newReducers ) {
-    var initialStateForNewReducers = Object.keys(newReducers).reduce(function ( state, reducerName) {
-      state[reducerName] = newReducers[reducerName]()
+    var initialStateForNewReducers = Object.keys(newReducers).reduce(function ( state, reducerName ) {
+      state[reducerName] = newReducers[reducerName](undefined, { type: ActionTypes.INIT })
       addReducerSelector(reducerName)
       return state
     }, {})
